@@ -7,6 +7,11 @@
 
 import Foundation
 
+print("finge que tem um player daqui")
+
+print("ate aqui aqui")
+
+
 print("Hello, World!")
 
 print(" ___________________________________________")
