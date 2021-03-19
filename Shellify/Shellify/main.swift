@@ -20,19 +20,19 @@ func addSong(songName : String) throws -> Song? {
             for item in commonMetaData {
                 if item.commonKey?.rawValue == "title" {
                     guard let songTitle = item.stringValue else {
-                        throw ShellifyError.PlaybackError
+                        throw ShellifyError.SongParametrizationFailed
                     }
                     newSong.name = songTitle
                 }
                 if item.commonKey?.rawValue == "artist" {
                     guard let songArtist = item.stringValue else {
-                        throw ShellifyError.PlaybackError
+                        throw ShellifyError.SongParametrizationFailed
                     }
                     newSong.artist = songArtist
                 }
                 if item.commonKey?.rawValue == "albumName" {
                     guard let songAlbum = item.stringValue else {
-                        throw ShellifyError.PlaybackError
+                        throw ShellifyError.SongParametrizationFailed
                     }
                     newSong.albumName = songAlbum
                 }
