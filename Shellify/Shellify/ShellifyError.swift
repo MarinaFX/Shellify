@@ -7,9 +7,10 @@
 
 import Foundation
 
-enum SpotifyError: Error {
+enum ShellifyError: Error {
     case SongNotFound
     case InvalidSongName
     case PlaybackError
     case SongFileNotFound
+    case SongParametrizationFailed
 }
