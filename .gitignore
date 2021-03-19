@@ -2,6 +2,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/xcode,swift,objective-c,cocoapods,carthage,swiftpackagemanager
 # Edit at https://www.toptal.com/developers/gitignore?templates=xcode,swift,objective-c,cocoapods,carthage,swiftpackagemanager
 
+#Ignoring song files due to copyright and piracy compliance
+.m4a
+
 #MacOSX File System configuration
 .DS_Store
 
