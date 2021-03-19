@@ -3,6 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=xcode,swift,objective-c,cocoapods,carthage,swiftpackagemanager
 
 #Ignoring song files due to copyright and piracy compliance
+/resources
 .m4a
 
 #MacOSX File System configuration
