@@ -9,15 +9,19 @@ import Foundation
 import AVFoundation
 
 let player: Player = Player.init()
+var userAnswer:String = ""
+
+print("Please paste the directory where your songs are:")
+userAnswer = readUserInput()
 do {
-    try player.loadPlaylist()
+    try player.loadPlaylist(userPath : userAnswer)
 } catch (ShellifyError.SongParametrizationFailed) {
     print("There was a problem while loading the playlist 😢")
 } catch (ShellifyError.SongFileNotFound) {
     print("There was a problem while loading the playlist 😢")
+} catch (ShellifyError.UnknownPath) {
+    print("There was a problem finding your song folder 😥")
 }
-
-var userAnswer:String = ""
 
 func startProgram(){
     var str = "    _____  _            _  _  _   __\n"
@@ -76,27 +80,42 @@ func readUserInput() -> String {
     return "An error occurred while reading the user input"
 }
 
-func showUserLibrary(){
+func showUserLibrary(library : [Song]){
     print("       ____________")
     print("     __|__________|__     Playlist ")
     print("    /    o--▶︎--o    \\     INDIE POP")
     print("   |  ❄︎❄︎   | |   ❄︎❄︎  |")
     print("   |  ❄︎❄︎   | |   ❄︎❄︎  |    The place where you can vibe")
-    print("    \\_______________/     Created By: Shellify • 5 Songs, 15 min 57 sec")
+    print("    \\_______________/     Created By: Shellify • \(library.count) Songs, 15 min 57 sec")
     print("                     ")
-    print(" ----------------------------------------------------------------------------------------")
-    print(" TITLE                   ARTIST                  ALBUM NAME")
-    print(" Amsterdam               Imagine Dragons         Night Visions")
-    print(" Royals                  Lorde                   Pure Heroine")
-    print(" Summertime Sadness      Lana Del Rey            Born to Die")
-    print(" Sex On Fire (Live)      Kings of Leon           iTunes Festival: London 2013 - Single")
-    print(" ----------------------------------------------------------------------------------------")
+    print(" ----------------------------------------------------------------------------------------------------------")
+    print(" TITLE                                ARTIST                               ALBUM NAME")
+    for song in library {
+        if song.name.count < 36 {
+            print(" \(song.name)", terminator:"")
+            for _ in song.name.count ... 36 {
+                print(" ", terminator:"")
+            }
+        }
+        if song.artist.count < 36 {
+            print("\(song.artist)", terminator:"")
+            for _ in song.artist.count ... 36 {
+                print(" ", terminator:"")
+            }
+        }
+        print("\(song.albumName)")
+    }
+ //   print(" Amsterdam               Imagine Dragons         Night Visions")
+ //   print(" Royals                  Lorde                   Pure Heroine")
+  //  print(" Summertime Sadness      Lana Del Rey            Born to Die")
+   // print(" Sex On Fire (Live)      Kings of Leon           iTunes Festival: London 2013 - Single")
+    print(" ----------------------------------------------------------------------------------------------------------")
     print("\n")
     print("Insert the name of which song you want to hear: ")
 }
 
 startProgram()
-showUserLibrary()
+showUserLibrary(library : player.songList)
 
 userAnswer = readUserInput()
 print("To exit the program, type: exit")

@@ -17,21 +17,30 @@ class Player {
         songList = []
     }
     
-    func loadPlaylist() throws {
-        try addSong(songName: "amsterdam")
-        try addSong(songName: "royals")
-        try addSong(songName: "Summertime Sadness")
-        try addSong(songName: "Sex on Fire (Live)")
+    func loadPlaylist(userPath: String) throws {
+        let searchPath = FileManager.default
+        do {
+            let songsURLs = try searchPath.contentsOfDirectory(atPath: userPath)
+            for paths in songsURLs {
+                try addSong(songName: userPath + "/" + paths)
+            }
+        } catch (ShellifyError.UnknownPath) {
+            throw ShellifyError.UnknownPath
+          }
+        
+   //     try addSong(songName: "amsterdam")
+    //    try addSong(songName: "royals")
+     //   try addSong(songName: "Summertime Sadness")
+     //   try addSong(songName: "Sex on Fire (Live)")
 
     }
     
     func addSong(songName : String) throws {
         let searchPath = FileManager.default
-        let fileName = "/Users/marinadepazzi/Desktop/Xcode-ADA/NanoChallenge-Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
 
-        if searchPath.fileExists(atPath: fileName) {
-            var newSong = Song(name: "", artist: "", albumName: "", duration: 0)
-            let urlString = URL(fileURLWithPath: fileName)
+        if searchPath.fileExists(atPath: songName) {
+            var newSong = Song(name: "", artist: "", albumName: "", duration: 0, URL: songName)
+            let urlString = URL(fileURLWithPath: songName)
             let avpItem = AVPlayerItem(url: urlString)
             let commonMetaData = avpItem.asset.commonMetadata
                 for item in commonMetaData {
@@ -60,7 +69,6 @@ class Player {
             } catch (ShellifyError.SongParametrizationFailed) {
                 throw ShellifyError.SongParametrizationFailed
                }
-            print(newSong.name)
             songList.append(newSong)
         }
         else {
@@ -73,20 +81,16 @@ class Player {
             player.stop()
         }
         else {
-            if try !isSongValid(songName: songName){
-                throw ShellifyError.SongNotFound
-            }
             
-            let searchPath = FileManager.default
+            do {
+                guard let songPath = try isSongValid(songName: songName) else {
+                    throw ShellifyError.SongNotFound
+                }
             
-            guard let songName : String = songName else {
-                throw ShellifyError.InvalidSongName
-            }
-            
-            let fileName = "/Users/marinadepazzi/Desktop/Xcode-ADA/NanoChallenge-Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
+                let searchPath = FileManager.default
     
-                if searchPath.fileExists(atPath: fileName) {
-                    let urlString = URL(fileURLWithPath: fileName)
+                if searchPath.fileExists(atPath: songPath) {
+                    let urlString = URL(fileURLWithPath: songPath)
                     do {
                         player = try AVAudioPlayer(contentsOf: urlString)
             
@@ -103,6 +107,7 @@ class Player {
                 else {
                     throw ShellifyError.SongNotFound
                 }
+            }
         }
     }
 
@@ -133,14 +138,14 @@ class Player {
         throw ShellifyError.PlaybackError
     }
     
-    func isSongValid(songName: String?) throws -> Bool {
+    func isSongValid(songName: String?) throws -> String? {
         if let unwrappedName: String = songName {
             for s in songList {
                 if s.name.localizedCaseInsensitiveContains(unwrappedName){
-                    return true
+                    return s.URL
                 }
             }
-            return false
+            return nil
         }
         
         throw ShellifyError.InvalidSongName

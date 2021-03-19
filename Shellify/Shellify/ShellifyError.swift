@@ -13,4 +13,5 @@ enum ShellifyError: Error {
     case PlaybackError
     case SongFileNotFound
     case SongParametrizationFailed
+    case UnknownPath
 }
