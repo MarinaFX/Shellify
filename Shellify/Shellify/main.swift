@@ -8,47 +8,16 @@
 import Foundation
 import AVFoundation
 
-func addSong(songName : String) throws -> Song? {
-    let searchPath = FileManager.default
-    let fileName = "/Users/diego/Documents/Xcode/Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
-
-    if searchPath.fileExists(atPath: fileName) {
-        var newSong = Song(name: "", artist: "", albumName: "", duration: 0)
-        let urlString = URL(fileURLWithPath: fileName)
-        let avpItem = AVPlayerItem(url: urlString)
-        let commonMetaData = avpItem.asset.commonMetadata
-            for item in commonMetaData {
-                if item.commonKey?.rawValue == "title" {
-                    guard let songTitle = item.stringValue else {
-                        throw ShellifyError.SongParametrizationFailed
-                    }
-                    newSong.name = songTitle
-                }
-                if item.commonKey?.rawValue == "artist" {
-                    guard let songArtist = item.stringValue else {
-                        throw ShellifyError.SongParametrizationFailed
-                    }
-                    newSong.artist = songArtist
-                }
-                if item.commonKey?.rawValue == "albumName" {
-                    guard let songAlbum = item.stringValue else {
-                        throw ShellifyError.SongParametrizationFailed
-                    }
-                    newSong.albumName = songAlbum
-                }
-            }
-        do {
-            let player = try AVAudioPlayer(contentsOf: urlString)
-            newSong.duration = player.duration
-        } catch (ShellifyError.SongParametrizationFailed) {
-            throw ShellifyError.SongParametrizationFailed
-           }
-        return newSong
-    }
-    
-    else { throw ShellifyError.SongFileNotFound }
+let player: Player = Player.init()
+do {
+    try player.loadPlaylist()
+} catch (ShellifyError.SongParametrizationFailed) {
+    print("There was a problem while loading the playlist 😢")
+} catch (ShellifyError.SongFileNotFound) {
+    print("There was a problem while loading the playlist 😢")
 }
-        
+
+var userAnswer:String = ""
 
 func startProgram(){
     var str = "    _____  _            _  _  _   __\n"
@@ -65,11 +34,27 @@ func startProgram(){
     
 }
 
-func playMusic(){
+func endProgram() {
+    var str = "    _____  _            _  _  _   __\n"
+        str += "   / ____|| |          | || |(_) / _|\n"
+        str += "  | (___  | |__    ___ | || | _ | |_  _   _\n"
+        str += "   \\___ \\ | '_ \\  / _ \\| || || ||  _|| | | |\n"
+        str += "   ____) || | | ||  __/| || || || |  | |_| |\n"
+        str += "  |_____/ |_| |_| \\___||_||_||_||_|  \\__,  |\n"
+        str += "                                       __/ |\n"
+        str += "                                      |___/\n"
+
+        print(str)}
+
+func playMusic(song: String){
     print(" ___________________________________________")
     print("|  _______________________________________  |")
     print("| / .-----------------------------------. \\ |")
-    print("| | | /\\ :                        90 min| | |")
+    
+    if song.count == 18 { print("| | | /\\ : \(song)     90 min| | |") }
+    if song.count == 9 { print("| | | /\\ : \(song)              4:01  | | |") }
+    if song.count == 6{ print("| | | /\\ : \(song)               3:10    | | |") }
+    
     print("| | |/--\\:....................... NR [ ]| | |")
     print("| | `-----------------------------------' | |")
     print("| |      //-\\\\   |         |   //-\\\\      | |")
@@ -103,9 +88,8 @@ func showUserLibrary(){
     print(" TITLE                   ARTIST                  ALBUM NAME")
     print(" Amsterdam               Imagine Dragons         Night Visions")
     print(" Royals                  Lorde                   Pure Heroine")
-    print(" Moves Like Jagger       Maroon 5                Holiday Gift - Single")
     print(" Summertime Sadness      Lana Del Rey            Born to Die")
-    print(" Sex on Fire (Live)      Kings of Leon           iTunes Festival: London 2013 - Single")
+    print(" Sex On Fire (Live)      Kings of Leon           iTunes Festival: London 2013 - Single")
     print(" ----------------------------------------------------------------------------------------")
     print("\n")
     print("Insert the name of which song you want to hear: ")
@@ -113,19 +97,8 @@ func showUserLibrary(){
 
 startProgram()
 showUserLibrary()
-var songLibrary : [Song] = []
-do {
-    guard let newSong = try addSong(songName: "amsterdam") else {
-        throw (ShellifyError.SongNotFound)
-    }
-    songLibrary.append(newSong)
-    
-} catch (ShellifyError.SongNotFound) {
-    throw ShellifyError.SongNotFound
-   }
-    
-let player: Player = Player.init(list: songLibrary)
-var userAnswer = readUserInput()
+
+userAnswer = readUserInput()
 print("To exit the program, type: exit")
 print("To pause a song, type: pause")
 
@@ -144,6 +117,7 @@ while userAnswer != "exit" {
             }
         default:
             try player.playSong(songName: userAnswer)
+            playMusic(song: userAnswer)
         }
     
     } catch (ShellifyError.InvalidSongName) {
@@ -163,4 +137,4 @@ while userAnswer != "exit" {
     userAnswer = readUserInput()
 }
 
-startProgram()
+endProgram()
