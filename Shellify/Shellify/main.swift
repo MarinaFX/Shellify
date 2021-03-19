@@ -11,42 +11,42 @@ import AVFoundation
 func addSong(songName : String) throws -> Song? {
     let searchPath = FileManager.default
     let fileName = "/Users/diego/Documents/Xcode/Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
-    let songTitle : String
-    let songArtist : String
-    let songAlbum : String
 
     if searchPath.fileExists(atPath: fileName) {
+        var newSong = Song(name: "", artist: "", albumName: "", duration: 0)
         let urlString = URL(fileURLWithPath: fileName)
         let avpItem = AVPlayerItem(url: urlString)
         let commonMetaData = avpItem.asset.commonMetadata
-        
             for item in commonMetaData {
                 if item.commonKey?.rawValue == "title" {
                     guard let songTitle = item.stringValue else {
-                        throw SpotifyError.PlaybackError
+                        throw ShellifyError.PlaybackError
                     }
-                    print("\(songTitle)")
+                    newSong.name = songTitle
                 }
                 if item.commonKey?.rawValue == "artist" {
                     guard let songArtist = item.stringValue else {
-                        throw SpotifyError.PlaybackError
+                        throw ShellifyError.PlaybackError
                     }
-                    print("\(songArtist)")
+                    newSong.artist = songArtist
                 }
-                if item.commonKey?.rawValue == "album" {
+                if item.commonKey?.rawValue == "albumName" {
                     guard let songAlbum = item.stringValue else {
-                        throw SpotifyError.PlaybackError
+                        throw ShellifyError.PlaybackError
                     }
-                    print("\(songAlbum)")
+                    newSong.albumName = songAlbum
                 }
             }
-        
+        do {
+            let player = try AVAudioPlayer(contentsOf: urlString)
+            newSong.duration = player.duration
+        } catch (ShellifyError.SongParametrizationFailed) {
+            throw ShellifyError.SongParametrizationFailed
+           }
+        return newSong
     }
     
-    else { throw SpotifyError.SongFileNotFound }
-    
-   // let newSong = Song(name: songTitle, artist: songArtist, albumName: songAlbum, duration: 220.0)
-    return nil
+    else { throw ShellifyError.SongFileNotFound }
 }
         
 
@@ -113,9 +113,18 @@ func showUserLibrary(){
 
 startProgram()
 showUserLibrary()
-let teste = try addSong(songName: "amsterdam")
-
-let player: Player = Player.init()
+var songLibrary : [Song] = []
+do {
+    guard let newSong = try addSong(songName: "amsterdam") else {
+        throw (ShellifyError.SongNotFound)
+    }
+    songLibrary.append(newSong)
+    
+} catch (ShellifyError.SongNotFound) {
+    throw ShellifyError.SongNotFound
+   }
+    
+let player: Player = Player.init(list: songLibrary)
 var userAnswer = readUserInput()
 print("To exit the program, type: exit")
 print("To pause a song, type: pause")
@@ -137,16 +146,18 @@ while userAnswer != "exit" {
             try player.playSong(songName: userAnswer)
         }
     
-    } catch (SpotifyError.InvalidSongName) {
+    } catch (ShellifyError.InvalidSongName) {
         print("Sorry, but it appers you've inserted a strange name for a song 😳")
-    } catch (SpotifyError.PlaybackError) {
+    } catch (ShellifyError.PlaybackError) {
         print("Sorry, but it appears there is an error with the playback 😰")
-    } catch (SpotifyError.SongFileNotFound) {
+    } catch (ShellifyError.SongFileNotFound) {
         print("Sorry, but it appears there was an error while loading the song file 😰")
-    } catch (SpotifyError.SongNotFound) {
+    } catch (ShellifyError.SongNotFound) {
         print("Sorry, but you've tried to play a song that is unavailable in the album 🤪")
+    } catch (ShellifyError.SongParametrizationFailed) {
+        print("Sorry, but there was an error adding your song 😰")
     } catch {
-        print("something went wrong")
+        print("Something went wrong 😰")
     }
     
     userAnswer = readUserInput()

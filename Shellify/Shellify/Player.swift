@@ -14,9 +14,9 @@ class Player {
     var songList: [Song]
     var currentSong: Song
     
-    init () {
-        songList = [Song.init(name: "Daydreamers", artist: "Pala", albumName: "Daydreamers", duration: 122.00)]
-        currentSong = Song.init(name: "current song", artist: "teste", albumName: "teste", duration: 122.00)
+    init (list : [Song]) {
+        songList = list
+        currentSong = songList[0]
     }
     
     func playSong(songName: String?) throws {
@@ -27,31 +27,36 @@ class Player {
             let searchPath = FileManager.default
             
             guard let songName : String = songName else {
-                throw SpotifyError.InvalidSongName
+                throw ShellifyError.InvalidSongName
             }
             
-            let fileName = "/Users/diego/Documents/Xcode/Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
+            for song in songList {
+                if song.name.localizedCaseInsensitiveContains(songName) {
+                    let fileName = "/Users/diego/Documents/Xcode/Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
             
-            if searchPath.fileExists(atPath: fileName) {
-                let urlString = URL(fileURLWithPath: fileName)
-                do {
-                    player = try AVAudioPlayer(contentsOf: urlString)
+                        if searchPath.fileExists(atPath: fileName) {
+                            let urlString = URL(fileURLWithPath: fileName)
+                            do {
+                                player = try AVAudioPlayer(contentsOf: urlString)
                     
-                    guard let player = player else {
-                        throw SpotifyError.PlaybackError
-                    }
+                                guard let player = player else {
+                                    throw ShellifyError.PlaybackError
+                                }
                     
-                    player.play()
-                } catch (SpotifyError.SongFileNotFound) {
-                    throw SpotifyError.SongFileNotFound
+                                player.play()
+                                return
+                            } catch (ShellifyError.SongFileNotFound) {
+                                throw ShellifyError.SongFileNotFound
+                            }
+                        }
+            
+                        else {
+                            throw ShellifyError.SongNotFound
+                        }
                 }
             }
-            
-            else {
-                throw SpotifyError.SongNotFound
-            }
+            throw ShellifyError.SongNotFound
         }
-            
     }
 
             
@@ -61,8 +66,8 @@ class Player {
             if try !isPlaying() {
                 player?.play()
             }
-        } catch (SpotifyError.PlaybackError){
-            throw SpotifyError.PlaybackError
+        } catch (ShellifyError.PlaybackError){
+            throw ShellifyError.PlaybackError
         }
     }
     
@@ -71,8 +76,8 @@ class Player {
             if try isPlaying() {
                 player?.stop()
             }
-        } catch (SpotifyError.PlaybackError){
-            throw SpotifyError.PlaybackError
+        } catch (ShellifyError.PlaybackError){
+            throw ShellifyError.PlaybackError
         }
     }
     
@@ -80,7 +85,7 @@ class Player {
         if let unwrappedPlayer: AVAudioPlayer = player {
             return unwrappedPlayer.isPlaying
         }
-        throw SpotifyError.PlaybackError
+        throw ShellifyError.PlaybackError
     }
     
     func searchSong(songName: String?) throws -> Song {
@@ -90,8 +95,8 @@ class Player {
                     return s;
                 }
             }
-            throw SpotifyError.SongNotFound
+            throw ShellifyError.SongNotFound
         }
-        throw SpotifyError.InvalidSongName
+        throw ShellifyError.InvalidSongName
     }
 }
