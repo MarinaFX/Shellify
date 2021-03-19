@@ -6,6 +6,49 @@
 //
 
 import Foundation
+import AVFoundation
+
+func addSong(songName : String) throws -> Song? {
+    let searchPath = FileManager.default
+    let fileName = "/Users/diego/Documents/Xcode/Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
+    let songTitle : String
+    let songArtist : String
+    let songAlbum : String
+
+    if searchPath.fileExists(atPath: fileName) {
+        let urlString = URL(fileURLWithPath: fileName)
+        let avpItem = AVPlayerItem(url: urlString)
+        let commonMetaData = avpItem.asset.commonMetadata
+        
+            for item in commonMetaData {
+                if item.commonKey?.rawValue == "title" {
+                    guard let songTitle = item.stringValue else {
+                        throw SpotifyError.PlaybackError
+                    }
+                    print("\(songTitle)")
+                }
+                if item.commonKey?.rawValue == "artist" {
+                    guard let songArtist = item.stringValue else {
+                        throw SpotifyError.PlaybackError
+                    }
+                    print("\(songArtist)")
+                }
+                if item.commonKey?.rawValue == "album" {
+                    guard let songAlbum = item.stringValue else {
+                        throw SpotifyError.PlaybackError
+                    }
+                    print("\(songAlbum)")
+                }
+            }
+        
+    }
+    
+    else { throw SpotifyError.SongFileNotFound }
+    
+   // let newSong = Song(name: songTitle, artist: songArtist, albumName: songAlbum, duration: 220.0)
+    return nil
+}
+        
 
 func startProgram(){
     var str = "    _____  _            _  _  _   __\n"
@@ -70,6 +113,7 @@ func showUserLibrary(){
 
 startProgram()
 showUserLibrary()
+let teste = try addSong(songName: "amsterdam")
 
 let player: Player = Player.init()
 var userAnswer = readUserInput()
@@ -98,7 +142,7 @@ while userAnswer != "exit" {
     } catch (SpotifyError.PlaybackError) {
         print("Sorry, but it appears there is an error with the playback 😰")
     } catch (SpotifyError.SongFileNotFound) {
-        print("Sorry, but it appeats there was an error while loading a song file 😰")
+        print("Sorry, but it appears there was an error while loading the song file 😰")
     } catch (SpotifyError.SongNotFound) {
         print("Sorry, but you've tried to play a song that is unavailable in the album 🤪")
     } catch {

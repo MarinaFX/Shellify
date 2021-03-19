@@ -24,21 +24,37 @@ class Player {
             player.stop()
         }
         else {
-            let urlString = URL(fileURLWithPath: "/Users/marinadepazzi/Desktop/Xcode-ADA/NanoChallenge-Shellify/Shellify/Shellify/resources/amsterdam.m4a")
-            do {
-                
-                player = try AVAudioPlayer(contentsOf: urlString)
-                
-                guard let player = player else {
-                    return
+            let searchPath = FileManager.default
+            
+            guard let songName : String = songName else {
+                throw SpotifyError.InvalidSongName
+            }
+            
+            let fileName = "/Users/diego/Documents/Xcode/Shellify/Shellify/Shellify/resources/" + songName + ".m4a"
+            
+            if searchPath.fileExists(atPath: fileName) {
+                let urlString = URL(fileURLWithPath: fileName)
+                do {
+                    player = try AVAudioPlayer(contentsOf: urlString)
+                    
+                    guard let player = player else {
+                        throw SpotifyError.PlaybackError
+                    }
+                    
+                    player.play()
+                } catch (SpotifyError.SongFileNotFound) {
+                    throw SpotifyError.SongFileNotFound
                 }
-                
-                player.play()
-            } catch {
-                print("something went wrong")
+            }
+            
+            else {
+                throw SpotifyError.SongNotFound
             }
         }
+            
     }
+
+            
     
     func continueReproduction() throws {
         do {
