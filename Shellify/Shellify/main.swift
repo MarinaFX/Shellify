@@ -127,19 +127,17 @@ startProgram()
 let player: Player = Player.init()
 var userAnswer:String = ""
 
-
 userAnswer = readUserInput()
-print("\nLoading playlist...\n")
+
 do {
     try player.loadPlaylist(userPath : userAnswer)
-} catch (ShellifyError.UnknownPath) {
-    print("There was a problem finding your song folder 😥")
-} catch (ShellifyError.SongParametrizationFailed) {
-    print("There was a problem while loading the playlist 😢")
-} catch (ShellifyError.SongFileNotFound) {
-    print("There was a problem while loading the playlist 😢")
+} catch {
+    print("\nThere was a problem finding your song folder 😥\n")
+    endProgram()
+    exit(0)
 }
 
+print("\nLoading playlist...\n")
 showUserLibrary(library : player.songList)
 
 userAnswer = readUserInput()
@@ -167,18 +165,18 @@ while userAnswer != "exit" {
         default:
             try player.playSong(songName: userAnswer)
             for song in player.songList {
-                if song.name.compare(userAnswer, options: .caseInsensitive) == .orderedSame {
+                if song.name.localizedCaseInsensitiveContains(userAnswer) {
                     playMusic(song : song)
                 }
             }
+            print("\nTo exit the program, type: exit")
+            print("To pause a song, type: pause")
+            print("To continue playing a song that was paused, type: play")
+            print("To skip a song, type: skip")
+            print("To listen another song, type its title\n")
+
         }
         
-        print("\nTo exit the program, type: exit")
-        print("To pause a song, type: pause")
-        print("To continue playing a song that was paused, type: play")
-        print("To skip a song, type: skip")
-        print("To listen another song, type its title\n")
-    
     } catch (ShellifyError.InvalidSongName) {
         print("Sorry, but it appers you've inserted a strange name for a song 😳")
     } catch (ShellifyError.PlaybackError) {

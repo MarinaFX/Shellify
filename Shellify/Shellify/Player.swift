@@ -24,9 +24,10 @@ class Player {
                 try addSong(songName: userPath + "/" + paths)
             }
         } catch (ShellifyError.UnknownPath) {
-            throw ShellifyError.UnknownPath
-          }
+        throw ShellifyError.UnknownPath
+        }
     }
+
     
     func addSong(songName : String) throws {
         let searchPath = FileManager.default
