@@ -2,22 +2,11 @@
 //  main.swift
 //  Shellify
 //
-//  Created by Marina De Pazzi on 16/03/21.
+//  Created by Marina De Pazzi and Diego Henrique on 16/03/21.
 //
 
 import Foundation
 import AVFoundation
-
-let player: Player = Player.init()
-do {
-    try player.loadPlaylist()
-} catch (ShellifyError.SongParametrizationFailed) {
-    print("There was a problem while loading the playlist 😢")
-} catch (ShellifyError.SongFileNotFound) {
-    print("There was a problem while loading the playlist 😢")
-}
-
-var userAnswer:String = ""
 
 func startProgram(){
     var str = "    _____  _            _  _  _   __\n"
@@ -28,10 +17,10 @@ func startProgram(){
         str += "  |_____/ |_| |_| \\___||_||_||_||_|  \\__,  |\n"
         str += "                                       __/ |\n"
         str += "                                      |___/\n"
-        str += " Loading playlist... \n"
+        str += "                                              \n"
+        str += "Please paste the directory where your songs are:"
 
         print(str)
-    
 }
 
 func endProgram() {
@@ -46,28 +35,43 @@ func endProgram() {
 
         print(str)}
 
-func playMusic(song: String){
-    print(" ___________________________________________")
-    print("|  _______________________________________  |")
-    print("| / .-----------------------------------. \\ |")
-    
-    if song.count == 18 { print("| | | /\\ : \(song)     90 min| | |") }
-    if song.count == 9 { print("| | | /\\ : \(song)              4:01  | | |") }
-    if song.count == 6{ print("| | | /\\ : \(song)               3:10    | | |") }
-    
-    print("| | |/--\\:....................... NR [ ]| | |")
-    print("| | `-----------------------------------' | |")
-    print("| |      //-\\\\   |         |   //-\\\\      | |")
-    print("| |     ||( )||  |_________|  ||( )||     | |")
-    print("| |      \\\\-//   :....:....:   \\\\-//      | |")
-    print("| |       _ _ ._  _ _ .__|_ _.._  _       | |")
-    print("| |      (_(_)| |(_(/_|  |_(_||_)(/_      | |")
-    print("| |               low noise   |           | |")
-    print("| `______ ____________________ ____ ______' |")
-    print("|        /    []             []    \\        |")
-    print("|       /  ()                   ()  \\       |")
-    print("!______/_____________________________\\______!")
+func playMusic(song: Song) {
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .positional
+    formatter.allowedUnits = [ .minute, .second ]
+    formatter.zeroFormattingBehavior = [ .pad ]
+
+    print(" ___________________________________________________________")
+    print("|  ______________________________________________________   |")
+    print("| / .--------------------------------------------------. \\  |")
+    if song.name.count < 37 {
+        print("| | | /\\ : \(song.name)", terminator:"")
+        for _ in song.name.count ... 37 {
+            print(" ", terminator:"")
+        }
+        print("\(formatter.string(from: song.duration)!) |  | |")
+    }
+    if song.artist.count < 35 {
+        print("| | |/--\\: \(song.artist) ", terminator:"")
+        for _ in song.artist.count ... 35 {
+            print(".", terminator:"")
+        }
+        print(" NR [ ]|  | |")
+    }
+    print("| | `--------------------------------------------------'  | |")
+    print("| |              //-\\\\   |         |   //-\\\\              | |")
+    print("| |             ||( )||  |_________|  ||( )||             | |")
+    print("| |              \\\\-//   :....:....:   \\\\-//              | |")
+    print("| |              _ _ ._  _ _ .__|_ _.._  _                | |")
+    print("| |             (_(_)| |(_(/_|  |_(_||_)(/_               | |")
+    print("| |                                  |                    | |")
+    print("| `_____ ____________________________________ ____ _______' |")
+    print("|       /    []                             []    \\         |")
+    print("|      /  ()                                   ()  \\        |")
+    print("!_____/_____________________________________________\\_______!")
 }
+
+
 
 func readUserInput() -> String {
     if let unrwrappedAnswer: String = readLine() {
@@ -76,31 +80,67 @@ func readUserInput() -> String {
     return "An error occurred while reading the user input"
 }
 
-func showUserLibrary(){
+func showUserLibrary(library : [Song]){
+    var totalDuration : TimeInterval = 0
+    var calendar = Calendar.current
+    calendar.locale = Locale(identifier: "en-UK")
+    let formatter = DateComponentsFormatter()
+    formatter.calendar = calendar
+    formatter.unitsStyle = .abbreviated
+    formatter.allowedUnits = [ .minute, .second ]
+    formatter.zeroFormattingBehavior = [ .pad ]
+    
+    for song in library {
+        totalDuration += song.duration
+    }
     print("       ____________")
     print("     __|__________|__     Playlist ")
     print("    /    o--▶︎--o    \\     INDIE POP")
     print("   |  ❄︎❄︎   | |   ❄︎❄︎  |")
     print("   |  ❄︎❄︎   | |   ❄︎❄︎  |    The place where you can vibe")
-    print("    \\_______________/     Created By: Shellify • 5 Songs, 15 min 57 sec")
+    print("    \\_______________/     Created By: Shellify • \(library.count) Songs, \(formatter.string(from:totalDuration)!)")
     print("                     ")
-    print(" ----------------------------------------------------------------------------------------")
-    print(" TITLE                   ARTIST                  ALBUM NAME")
-    print(" Amsterdam               Imagine Dragons         Night Visions")
-    print(" Royals                  Lorde                   Pure Heroine")
-    print(" Summertime Sadness      Lana Del Rey            Born to Die")
-    print(" Sex On Fire (Live)      Kings of Leon           iTunes Festival: London 2013 - Single")
-    print(" ----------------------------------------------------------------------------------------")
+    print(" ----------------------------------------------------------------------------------------------------------")
+    print(" TITLE                                ARTIST                               ALBUM NAME")
+    for song in library {
+        if song.name.count < 36 {
+            print(" \(song.name)", terminator:"")
+            for _ in song.name.count ... 36 {
+                print(" ", terminator:"")
+            }
+        }
+        if song.artist.count < 36 {
+            print("\(song.artist)", terminator:"")
+            for _ in song.artist.count ... 36 {
+                print(" ", terminator:"")
+            }
+        }
+        print("\(song.albumName)")
+    }
+    print(" ----------------------------------------------------------------------------------------------------------")
     print("\n")
     print("Insert the name of which song you want to hear: ")
 }
 
 startProgram()
-showUserLibrary()
+
+let player: Player = Player.init()
+var userAnswer:String = ""
 
 userAnswer = readUserInput()
-print("To exit the program, type: exit")
-print("To pause a song, type: pause")
+
+do {
+    try player.loadPlaylist(userPath : userAnswer)
+} catch {
+    print("\nThere was a problem finding your song folder 😥\n")
+    endProgram()
+    exit(0)
+}
+
+print("\nLoading playlist...\n")
+showUserLibrary(library : player.songList)
+
+userAnswer = readUserInput()
 
 while userAnswer != "exit" {
     do {
@@ -115,11 +155,28 @@ while userAnswer != "exit" {
             if ((player.player?.isPlaying) != nil) {
                 try player.continueReproduction()
             }
+        case "skip":
+            if ((player.player?.isPlaying) != nil) {
+                guard let nextSong: Song = try player.skipSong() else {
+                    throw ShellifyError.PlaybackError
+                }
+                playMusic(song: nextSong)
+            }
         default:
             try player.playSong(songName: userAnswer)
-            playMusic(song: userAnswer)
+            for song in player.songList {
+                if song.name.localizedCaseInsensitiveContains(userAnswer) {
+                    playMusic(song : song)
+                }
+            }
+            print("\nTo exit the program, type: exit")
+            print("To pause a song, type: pause")
+            print("To continue playing a song that was paused, type: play")
+            print("To skip a song, type: skip")
+            print("To listen another song, type its title\n")
+
         }
-    
+        
     } catch (ShellifyError.InvalidSongName) {
         print("Sorry, but it appers you've inserted a strange name for a song 😳")
     } catch (ShellifyError.PlaybackError) {
@@ -127,7 +184,7 @@ while userAnswer != "exit" {
     } catch (ShellifyError.SongFileNotFound) {
         print("Sorry, but it appears there was an error while loading the song file 😰")
     } catch (ShellifyError.SongNotFound) {
-        print("Sorry, but you've tried to play a song that is unavailable in the album 🤪")
+        print("Sorry, but you've tried to play a song that is not inside the folder 🤪")
     } catch (ShellifyError.SongParametrizationFailed) {
         print("Sorry, but there was an error adding your song 😰")
     } catch {

@@ -12,4 +12,5 @@ struct Song {
     var artist: String
     var albumName: String
     var duration: TimeInterval
+    var URL : String
 }
