@@ -2,7 +2,7 @@
 //  SongNotFoundError.swift
 //  Shellify
 //
-//  Created by Marina De Pazzi on 17/03/21.
+//  Created by Marina De Pazzi and Diego Henrique on 17/03/21.
 //
 
 import Foundation

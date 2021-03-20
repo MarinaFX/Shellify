@@ -2,11 +2,10 @@
 //  Player.swift
 //  Shellify
 //
-//  Created by Marina De Pazzi on 17/03/21.
+//  Created by Marina De Pazzi and Diego Henrique on 17/03/21.
 //
 
 import Foundation
-
 import AVFoundation
 
 class Player {
@@ -27,12 +26,6 @@ class Player {
         } catch (ShellifyError.UnknownPath) {
             throw ShellifyError.UnknownPath
           }
-        
-   //     try addSong(songName: "amsterdam")
-    //    try addSong(songName: "royals")
-     //   try addSong(songName: "Summertime Sadness")
-     //   try addSong(songName: "Sex on Fire (Live)")
-
     }
     
     func addSong(songName : String) throws {
@@ -79,6 +72,7 @@ class Player {
     func playSong(songName: String?) throws {
         if let player = player, player.isPlaying {
             player.stop()
+            try playSong(songName: songName)
         }
         else {
             
@@ -93,11 +87,11 @@ class Player {
                     let urlString = URL(fileURLWithPath: songPath)
                     do {
                         player = try AVAudioPlayer(contentsOf: urlString)
-            
+                        
                         guard let player = player else {
                             throw ShellifyError.PlaybackError
                         }
-            
+                        player.prepareToPlay()
                         player.play()
                         return
                     } catch (ShellifyError.SongFileNotFound) {
@@ -121,6 +115,43 @@ class Player {
         }
     }
     
+    func skipSong() throws -> Song? {
+        do {
+            if try isPlaying() {
+                player?.stop()
+                for i in songList.indices {
+                    let stringURL = player!.url!.relativePath
+                    if stringURL == songList[i].URL {
+                        if i == songList.count-1 {
+                            let urlString = URL(fileURLWithPath: songList[0].URL)
+                            player = try AVAudioPlayer(contentsOf: urlString)
+                            guard let player = player else {
+                                throw ShellifyError.PlaybackError
+                            }
+                            player.prepareToPlay()
+                            player.play()
+                            return songList[0]
+                        }
+                        else {
+                            let urlString = URL(fileURLWithPath: songList[i+1].URL)
+                            player = try AVAudioPlayer(contentsOf: urlString)
+                            guard let player = player else {
+                                throw ShellifyError.PlaybackError
+                            }
+                            player.prepareToPlay()
+                            player.play()
+                            return songList[i+1]
+                        }
+                    }
+                }
+                return nil
+            }
+            return nil
+        } catch (ShellifyError.PlaybackError){
+            throw ShellifyError.PlaybackError
+        }
+    }
+    
     func pauseSong() throws {
         do {
             if try isPlaying() {
@@ -130,6 +161,7 @@ class Player {
             throw ShellifyError.PlaybackError
         }
     }
+    
     
     func isPlaying() throws -> Bool {
         if let unwrappedPlayer: AVAudioPlayer = player {
