@@ -1,7 +1,7 @@
 
 
 
-## <samp> Welcome to Shellify! <img src="https://media.giphy.com/media/jpbnoe3UIa8TU8LM13/giphy.gif" width="100px"/></samp>
+## <samp> Welcome to Shellify! <img src="https://raw.githubusercontent.com/MarinaFX/Shellify/master/img-resources/catJAM.gif" width="100px"/></samp>
 
 
 ### What is Shellify? 
